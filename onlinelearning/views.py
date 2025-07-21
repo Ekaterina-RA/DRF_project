@@ -1,7 +1,10 @@
 from rest_framework.viewsets import ModelViewSet, generics
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
+from django.http import HttpResponse
 
+def home(request):
+    return HttpResponse("Добро пожаловать на онлайн-обучение!")
 
 class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()

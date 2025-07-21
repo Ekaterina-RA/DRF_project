@@ -1,31 +1,42 @@
 from django.core.management.base import BaseCommand
-from users.models import Payment, User
+from users.models import User
 from onlinelearning.models import Course, Lesson
+from users.models import Payment
+import random
+from datetime import datetime, timedelta
 
 
 class Command(BaseCommand):
-    help = "Load payments data"
+    help = "Fill payments with test data"
 
     def handle(self, *args, **options):
-        user1 = User.objects.get(email="user1@example.com")
-        user2 = User.objects.get(email="user2@example.com")
-        course1 = Course.objects.get(title="Course 1")
-        lesson1 = Lesson.objects.get(title="Lesson 1")
+        users = User.objects.all()
+        courses = Course.objects.all()
+        lessons = Lesson.objects.all()
+        payment_methods = ["cash", "transfer"]
 
-        Payment.objects.create(
-            user=user1,
-            paid_course=course1,
-            paid_lesson=None,
-            amount=1000.00,
-            payment_method="transfer",
-        )
+        for i in range(20):
+            user = random.choice(users)
+            payment_date = datetime.now() - timedelta(days=random.randint(1, 30))
 
-        Payment.objects.create(
-            user=user2,
-            paid_course=None,
-            paid_lesson=lesson1,
-            amount=500.00,
-            payment_method="cash",
-        )
+            # Выбираем случайно курс или урок
+            if random.choice([True, False]):
+                paid_course = random.choice(courses)
+                paid_lesson = None
+                amount = random.randint(1000, 5000)
+            else:
+                paid_course = None
+                paid_lesson = random.choice(lessons)
+                amount = random.randint(500, 2000)
 
-        self.stdout.write(self.style.SUCCESS("Successfully loaded payments data"))
+            payment = Payment(
+                user=user,
+                payment_date=payment_date,
+                paid_course=paid_course,
+                paid_lesson=paid_lesson,
+                amount=amount,
+                payment_method=random.choice(payment_methods),
+            )
+            payment.save()
+
+        self.stdout.write(self.style.SUCCESS("Successfully filled payments"))

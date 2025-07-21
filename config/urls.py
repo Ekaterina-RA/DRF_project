@@ -1,23 +1,28 @@
 from django.contrib import admin
-from django.template.context_processors import static
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+from django.conf.urls.static import static
+
+from config import settings
 from onlinelearning.views import (
     CourseViewSet,
     LessonListCreateAPIView,
     LessonRetrieveAPIView,
     LessonUpdateAPIView,
-    LessonDestroyAPIView,
+    LessonDestroyAPIView, home,
 )
-from users.serializers import PaymentViewSet
+from users.views import PaymentViewSet
 
 router = DefaultRouter()
 router.register(r"courses", CourseViewSet)
-router.register(r"payments", PaymentViewSet)
+router.register(r"users", PaymentViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('', home),
     path("learning/", include("onlinelearning.urls", namespace="learning")),
+    path("api/payments/", include("users.urls")),
     path("api/", include(router.urls)),
     path("api/lessons/", LessonListCreateAPIView.as_view(), name="lesson-list"),
     path(
