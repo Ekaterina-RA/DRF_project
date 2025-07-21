@@ -10,7 +10,8 @@ from onlinelearning.views import (
     LessonListCreateAPIView,
     LessonRetrieveAPIView,
     LessonUpdateAPIView,
-    LessonDestroyAPIView, home,
+    LessonDestroyAPIView,
+    home,
 )
 from users.views import PaymentViewSet
 
@@ -20,7 +21,7 @@ router.register(r"users", PaymentViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', home),
+    path("", home),
     path("learning/", include("onlinelearning.urls", namespace="learning")),
     path("api/payments/", include("users.urls")),
     path("api/", include(router.urls)),

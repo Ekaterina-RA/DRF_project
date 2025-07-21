@@ -30,5 +30,5 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ['id', 'user', 'paid_course', 'paid_lesson', 'amount', 'payment_date']
+        fields = ["id", "user", "paid_course", "paid_lesson", "amount", "payment_date"]
         ordering = ["-payment_date"]
