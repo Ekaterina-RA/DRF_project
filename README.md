@@ -11,4 +11,3 @@
 ##Установка:
 1. Клонируйте репозиторий git@github.com:Ekaterina-RA/DRF_project.git
 2. Установите зависимости pip install
- 

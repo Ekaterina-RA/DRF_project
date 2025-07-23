@@ -17,7 +17,10 @@ class PaymentViewSet(viewsets.ModelViewSet):
         "amount": ["gte", "lte", "exact"],
     }
     ordering_fields = ["payment_date", "amount"]
-    ordering = ["-payment_date"]  # Сортировка по умолчанию
+    ordering = ["-payment_date"]
+
+    def get_extra_action_map(self):
+        return {}
 
     def get_queryset(self):
         queryset = super().get_queryset()
