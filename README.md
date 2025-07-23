@@ -5,7 +5,10 @@
 2. Созданы модели Course, Lesson и User
 3.  Описаны CRUD для моделей Course (Viewsets) и Lesson (Generic)
 4. Создан файл serializers.py, гдн описаны простые сериализаторы для моделей Course и Lesson
+5. Для модели Course добавлено поле lessons_count (поле вывода количества уроков)
+6. Создана новая модель Payments, добавлена фильтрация для вывода списка платежей в классе PaymentViewSet
 
 ##Установка:
 1. Клонируйте репозиторий git@github.com:Ekaterina-RA/DRF_project.git
 2. Установите зависимости pip install
+ 
