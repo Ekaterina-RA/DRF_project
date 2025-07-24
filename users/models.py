@@ -1,9 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
-from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
-
-from onlinelearning.models import Course, Lesson
+from django.db import models
 
 
 class UserManager(BaseUserManager):
@@ -74,13 +71,15 @@ class Payment(models.Model):
         ("transfer", "Перевод на счет"),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="payments")
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="payments"
+    )
     payment_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата оплаты")
     paid_course = models.ForeignKey(
-        Course, on_delete=models.SET_NULL, null=True, blank=True
+        "onlinelearning.Course", on_delete=models.SET_NULL, null=True, blank=True
     )
     paid_lesson = models.ForeignKey(
-        Lesson, on_delete=models.SET_NULL, null=True, blank=True
+        "onlinelearning.Lesson", on_delete=models.SET_NULL, null=True, blank=True
     )
     amount = models.DecimalField(
         max_digits=10, decimal_places=2, verbose_name="Сумма оплаты"

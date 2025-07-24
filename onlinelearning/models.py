@@ -10,6 +10,9 @@ class Course(models.Model):
         verbose_name="описание курса",
         help_text="Укажите описание курса",
     )
+    owner = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, null=True, related_name="courses"
+    )
 
     class Meta:
         verbose_name = "Курс"
@@ -20,7 +23,9 @@ class Course(models.Model):
 
 
 class Lesson(models.Model):
-    course = models.ForeignKey(Course, related_name="lessons", on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        "onlinelearning.Course", related_name="lessons", on_delete=models.CASCADE
+    )
     title = models.CharField(max_length=255, help_text="Укажите наименование урока")
     description = models.TextField(
         blank=True,
@@ -30,6 +35,9 @@ class Lesson(models.Model):
     )
     preview = models.ImageField(upload_to="lesson_previews/", blank=True, null=True)
     video_link = models.URLField(blank=True, null=True)
+    owner = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, null=True, related_name="lessons"
+    )
 
     class Meta:
         verbose_name = "Урок"
