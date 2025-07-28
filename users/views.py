@@ -6,8 +6,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from onlinelearning.permissions import IsOwnerOrModerator
-
 from .models import Payment, User
 from .permissions import IsOwner
 from .serializers import (CustomTokenObtainPairSerializer, GroupSerializer,
