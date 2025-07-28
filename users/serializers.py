@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Group
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -49,7 +50,13 @@ class PaymentSerializer(serializers.ModelSerializer):
         read_only_fields = ["user"]
 
 
-class UserSerializer(serializers.ModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ["name"]
+
+
+class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["email", "password", "phone", "city", "avatar"]
@@ -66,10 +73,17 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    groups = GroupSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ["email", "phone", "city", "avatar", "groups"]
+        read_only_fields = ["email", "groups"]
+
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token["email"] = user.email
-        token["is_staff"] = user.is_staff
-        return token
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        data["user"] = UserProfileSerializer(self.user).data
+        return data

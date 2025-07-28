@@ -5,10 +5,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from config import settings
-from onlinelearning.views import (CourseViewSet, LessonDestroyAPIView,
-                                  LessonListCreateAPIView,
-                                  LessonRetrieveAPIView, LessonUpdateAPIView,
-                                  home)
+from onlinelearning.views import CourseViewSet, home
 from users.views import CustomTokenObtainPairView, PaymentViewSet
 
 router = DefaultRouter()
@@ -22,20 +19,6 @@ urlpatterns = [
     path("users/", include("users.urls", namespace="users")),
     path("api/payments/", include("users.urls")),
     path("api/", include(router.urls)),
-    path("api/lessons/", LessonListCreateAPIView.as_view(), name="lesson-list"),
-    path(
-        "api/lessons/<int:pk>/", LessonRetrieveAPIView.as_view(), name="lesson-detail"
-    ),
-    path(
-        "api/lessons/<int:pk>/update/",
-        LessonUpdateAPIView.as_view(),
-        name="lesson-update",
-    ),
-    path(
-        "api/lessons/<int:pk>/delete/",
-        LessonDestroyAPIView.as_view(),
-        name="lesson-delete",
-    ),
     path("api/token/", CustomTokenObtainPairView.as_view(), name="api_token"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/users/", include("users.urls")),

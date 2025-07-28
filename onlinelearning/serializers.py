@@ -10,14 +10,6 @@ class LessonSerializer(serializers.ModelSerializer):
         read_only_fields = ["owner"]
 
 
-class LessonDetailSerializer(serializers.ModelSerializer):
-    """Сериализатор для детального просмотра урока"""
-
-    class Meta:
-        model = Lesson
-        fields = "__all__"
-
-
 class CourseSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)
 
