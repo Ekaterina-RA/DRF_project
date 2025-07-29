@@ -1,4 +1,4 @@
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -63,13 +63,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        user = User.objects.create(
             email=validated_data["email"],
             password=validated_data["password"],
             phone=validated_data.get("phone"),
             city=validated_data.get("city"),
             avatar=validated_data.get("avatar"),
         )
+
+        user.set_password(validated_data['password'])
+        user.save()
         return user
 
 
