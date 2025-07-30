@@ -1,8 +1,12 @@
 from django.http import HttpResponse
-from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import Course, Lesson
+from .models import Course, Lesson, Subscription
+from .paginators import CoursePagination, LessonPagination
 from .permissions import IsModerator, IsOwnerOrModerator
 from .serializers import CourseSerializer, LessonSerializer
 
@@ -14,6 +18,7 @@ def home(request):
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
+    pagination_class = CoursePagination
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -39,6 +44,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 class LessonViewSet(viewsets.ModelViewSet):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()  # Добавляем базовый queryset
+    pagination_class = LessonPagination
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -59,3 +65,24 @@ class LessonViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class SubscriptionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        course_id = request.data.get("course_id")
+        course = get_object_or_404(Course, id=course_id)
+
+        subscription, created = Subscription.objects.get_or_create(
+            user=user, course=course
+        )
+
+        if not created:
+            subscription.delete()
+            message = "Подписка удалена"
+        else:
+            message = "Подписка добавлена"
+
+        return Response({"message": message}, status=status.HTTP_200_OK)

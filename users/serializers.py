@@ -71,7 +71,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             avatar=validated_data.get("avatar"),
         )
 
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data["password"])
         user.save()
         return user
 

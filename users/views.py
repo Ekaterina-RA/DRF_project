@@ -8,9 +8,13 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import Payment, User
 from .permissions import IsOwner
-from .serializers import (CustomTokenObtainPairSerializer, GroupSerializer,
-                          PaymentSerializer, UserProfileSerializer,
-                          UserRegisterSerializer)
+from .serializers import (
+    CustomTokenObtainPairSerializer,
+    GroupSerializer,
+    PaymentSerializer,
+    UserProfileSerializer,
+    UserRegisterSerializer,
+)
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
