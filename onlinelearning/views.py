@@ -1,33 +1,88 @@
-from rest_framework.viewsets import ModelViewSet, generics
-from .models import Course, Lesson
-from .serializers import CourseSerializer, LessonSerializer
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import Course, Lesson, Subscription
+from .paginators import CoursePagination, LessonPagination
+from .permissions import IsModerator, IsOwnerOrModerator
+from .serializers import CourseSerializer, LessonSerializer
 
 
 def home(request):
     return HttpResponse("Добро пожаловать на онлайн-обучение!")
 
 
-class CourseViewSet(ModelViewSet):
-    queryset = Course.objects.all()
+class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
+    queryset = Course.objects.all()
+    pagination_class = CoursePagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not self.request.user.is_staff and not IsModerator().has_permission(
+            self.request, self
+        ):
+            queryset = queryset.filter(owner=self.request.user)
+        return queryset
+
+    def get_permissions(self):
+        if self.action in ["create", "destroy"]:
+            self.permission_classes = [IsAuthenticated, ~IsModerator]
+        elif self.action in ["update", "partial_update"]:
+            self.permission_classes = [IsAuthenticated, IsOwnerOrModerator]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return [permission() for permission in self.permission_classes]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
-class LessonListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Lesson.objects.all()
+class LessonViewSet(viewsets.ModelViewSet):
     serializer_class = LessonSerializer
+    queryset = Lesson.objects.all()  # Добавляем базовый queryset
+    pagination_class = LessonPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not self.request.user.is_staff and not IsModerator().has_permission(
+            self.request, self
+        ):
+            queryset = queryset.filter(owner=self.request.user)
+        return queryset
+
+    def get_permissions(self):
+        if self.action in ["create", "destroy"]:
+            self.permission_classes = [IsAuthenticated, ~IsModerator]
+        elif self.action in ["update", "partial_update"]:
+            self.permission_classes = [IsAuthenticated, IsOwnerOrModerator]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return [permission() for permission in self.permission_classes]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
-class LessonRetrieveAPIView(generics.RetrieveAPIView):
-    queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer
+class SubscriptionAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        course_id = request.data.get("course_id")
+        course = get_object_or_404(Course, id=course_id)
 
-class LessonUpdateAPIView(generics.UpdateAPIView):
-    queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer
+        subscription, created = Subscription.objects.get_or_create(
+            user=user, course=course
+        )
 
+        if not created:
+            subscription.delete()
+            message = "Подписка удалена"
+        else:
+            message = "Подписка добавлена"
 
-class LessonDestroyAPIView(generics.DestroyAPIView):
-    queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer
+        return Response({"message": message}, status=status.HTTP_200_OK)

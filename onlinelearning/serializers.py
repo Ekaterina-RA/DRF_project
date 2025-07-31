@@ -1,38 +1,28 @@
 from rest_framework import serializers
-from .models import Course, Lesson
+
+from .models import Course, Lesson, Subscription
+from .validators import validate_youtube
 
 
-class LessonListSerializer(serializers.ModelSerializer):
-    """Сериализатор для списка уроков"""
+class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        fields = ['id', 'title', 'description', 'video_link']
-
-
-class LessonDetailSerializer(serializers.ModelSerializer):
-    """Сериализатор для детального просмотра урока"""
-    class Meta:
-        model = Lesson
-        fields = '__all__'
+        fields = "__all__"
+        read_only_fields = ["owner"]
+        extra_kwargs = {"video_link": {"validators": [validate_youtube]}}
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    lessons = LessonListSerializer(
-        source='lessons.all', 
-        many=True, 
-        read_only=True,
-        help_text="Список уроков курса"
-    )
-    lesson_count = serializers.SerializerMethodField(
-        help_text="Количество уроков в курсе"
-    )
+    lessons = LessonSerializer(many=True, read_only=True)
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'preview', 'lesson_count', 'lessons']
-        extra_kwargs = {
-            'preview': {'read_only': True}
-        }
+        fields = "__all__"
+        read_only_fields = ["owner"]
 
-    def get_lesson_count(self, obj):
-        return obj.lessons.count()
+    def get_is_subscribed(self, obj):
+        user = self.context["request"].user
+        if not user.is_authenticated:
+            return False
+        return Subscription.objects.filter(user=user, course=obj).exists()

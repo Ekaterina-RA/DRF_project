@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import User
+
 
 class Course(models.Model):
     title = models.CharField(max_length=255, help_text="Укажите наименование курса")
@@ -9,6 +11,9 @@ class Course(models.Model):
         null=True,
         verbose_name="описание курса",
         help_text="Укажите описание курса",
+    )
+    owner = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, null=True, related_name="courses"
     )
 
     class Meta:
@@ -20,7 +25,9 @@ class Course(models.Model):
 
 
 class Lesson(models.Model):
-    course = models.ForeignKey(Course, related_name="lessons", on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        "onlinelearning.Course", related_name="lessons", on_delete=models.CASCADE
+    )
     title = models.CharField(max_length=255, help_text="Укажите наименование урока")
     description = models.TextField(
         blank=True,
@@ -30,6 +37,9 @@ class Lesson(models.Model):
     )
     preview = models.ImageField(upload_to="lesson_previews/", blank=True, null=True)
     video_link = models.URLField(blank=True, null=True)
+    owner = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, null=True, related_name="lessons"
+    )
 
     class Meta:
         verbose_name = "Урок"
@@ -37,3 +47,16 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="subscriptions"
+    )
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="subscriptions"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ["user", "course"]

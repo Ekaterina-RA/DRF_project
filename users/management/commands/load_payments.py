@@ -1,9 +1,10 @@
-from django.core.management.base import BaseCommand
-from users.models import User
-from onlinelearning.models import Course, Lesson
-from users.models import Payment
 import random
 from datetime import datetime, timedelta
+
+from django.core.management.base import BaseCommand
+
+from onlinelearning.models import Course, Lesson
+from users.models import Payment, User
 
 
 class Command(BaseCommand):
