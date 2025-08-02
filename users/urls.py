@@ -3,13 +3,13 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .apps import UsersConfig
-from .views import CustomTokenObtainPairView, PaymentViewSet, UserViewSet
+from .views import CustomTokenObtainPairView, UserViewSet
 
 app_name = UsersConfig.name
 
 router = DefaultRouter()
 router.register(r"users", UserViewSet)
-router.register(r"payments", PaymentViewSet, basename="payments")
+
 
 urlpatterns = [
     path("", include(router.urls)),
