@@ -1,6 +1,5 @@
 from django.contrib.auth.models import Group
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -73,17 +72,18 @@ class PaymentViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"], url_path="create")
     def create_payment(self, request):
         course = get_object_or_404(Course, id=request.data.get("course_id"))
+        amount = request.data.get("amount")
 
         # Создаем продукт и цену в Stripe
         product_id = StripeService.create_product(
             name=course.title, description=course.description
         )
         price_id = StripeService.create_price(
-            amount=1000.00, product_id=product_id  # Пример: 1000 руб
+            amount=float(amount), product_id=product_id
         )
 
         # Создаем сессию оплаты
-        session = StripeService.create_checkout_session(
+        session = StripeService.create_session(
             price_id=price_id,
             success_url="http://127.0.0.1:8000/success/",
             cancel_url="http://127.0.0.1:8000/cancel/",
@@ -93,7 +93,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         payment = Payment.objects.create(
             user=request.user,
             paid_course=course,
-            amount=1000.00,
+            amount=float(amount),
             stripe_product_id=product_id,
             stripe_price_id=price_id,
             stripe_session_id=session["session_id"],

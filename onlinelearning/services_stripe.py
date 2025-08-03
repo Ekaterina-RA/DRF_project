@@ -39,7 +39,7 @@ class StripeService:
             raise
 
     @staticmethod
-    def create_price(amount, product_id, currency):
+    def create_price(amount, product_id, currency="rub"):
         """Создаем стоимость товара"""
         StripeService._check_keys()
 
