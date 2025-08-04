@@ -25,21 +25,12 @@ schema_view = get_schema_view(
 )
 
 
-router = DefaultRouter()
-router.register(r"courses", CourseViewSet)
-router.register(r"users", PaymentViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", home),
-    path("learning/", include("onlinelearning.urls", namespace="learning")),
-    path("users/", include("users.urls", namespace="users")),
-    path("api/payments/", include("users.urls")),
-    path("api/", include(router.urls)),
-    path("api/token/", CustomTokenObtainPairView.as_view(), name="api_token"),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/learning/", include("onlinelearning.urls", namespace="learning")),
     path("api/users/", include("users.urls")),
-    path("api/", include("onlinelearning.urls")),
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),
