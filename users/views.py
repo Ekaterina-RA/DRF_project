@@ -50,9 +50,10 @@ class PaymentViewSet(viewsets.ModelViewSet):
         operation_summary="Создать платеж",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=["course_id"],
+            required=["course_id", "amount"],
             properties={
                 "course_id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                "amount": openapi.Schema(type=openapi.TYPE_INTEGER),
             },
         ),
         responses={
