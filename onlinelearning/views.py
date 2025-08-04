@@ -6,7 +6,10 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from onlinelearning.tasks import send_course_update_notification, send_lesson_update_notification
+
+from onlinelearning.tasks import (send_course_update_notification,
+                                  send_lesson_update_notification)
+
 from .models import Course, Lesson, Subscription
 from .paginators import CoursePagination, LessonPagination
 from .permissions import IsModerator, IsOwnerOrModerator

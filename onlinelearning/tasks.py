@@ -1,7 +1,9 @@
+from datetime import timedelta
+
 from celery import shared_task
 from django.core.mail import send_mail
 from django.utils import timezone
-from datetime import timedelta
+
 from onlinelearning.models import Course, Subscription
 
 
@@ -23,6 +25,7 @@ def send_course_update_notification(course_id):
 @shared_task
 def send_lesson_update_notification(lesson_id):
     from onlinelearning.models import Lesson, Subscription
+
     lesson = Lesson.objects.get(id=lesson_id)
     course = lesson.course
 
