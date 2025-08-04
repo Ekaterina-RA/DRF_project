@@ -11,7 +11,6 @@ app_name = OnlinelearningConfig.name
 router = SimpleRouter()
 router.register(r"courses", CourseViewSet, basename="courses")
 router.register(r"lessons", LessonViewSet, basename="lessons")
-router.register(r"api/payments", PaymentViewSet, basename="payments")
 
 urlpatterns = [
     path("", include(router.urls)),
