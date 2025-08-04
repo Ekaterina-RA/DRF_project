@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "django_filters",
     "users",
     "onlinelearning",
+    "drf_yasg",
 ]
 
 REST_FRAMEWORK = {
@@ -129,3 +130,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "users.User"
+
+
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+
+# Проверяем, что ключи работают
+if not STRIPE_SECRET_KEY or not STRIPE_PUBLIC_KEY:
+    raise ValueError("Stripe API keys are missing in environment variables")

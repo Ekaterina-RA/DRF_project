@@ -2,7 +2,9 @@ from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from onlinelearning.apps import OnlinelearningConfig
-from onlinelearning.views import CourseViewSet, LessonViewSet, SubscriptionAPIView
+from onlinelearning.views import (CourseViewSet, LessonViewSet,
+                                  SubscriptionAPIView)
+from users.views import PaymentViewSet
 
 app_name = OnlinelearningConfig.name
 

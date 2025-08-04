@@ -1,5 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -19,6 +21,22 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
     pagination_class = CoursePagination
+
+    @swagger_auto_schema(
+        operation_summary="Список курсов",
+        operation_description="Cписок всех курсов с возможностью фильтрации",
+        manual_parameters=[
+            openapi.Parameter(
+                "is_subscribed",
+                openapi.IN_QUERY,
+                description="Фильтр по подписке (true/false)",
+                type=openapi.TYPE_BOOLEAN,
+            ),
+        ],
+        responses={200: CourseSerializer(many=True)},
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = super().get_queryset()

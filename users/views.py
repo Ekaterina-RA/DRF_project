@@ -1,23 +1,27 @@
 from django.contrib.auth.models import Group
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from onlinelearning.models import Course
+from onlinelearning.services_stripe import StripeService
+
 from .models import Payment, User
 from .permissions import IsOwner
-from .serializers import (
-    CustomTokenObtainPairSerializer,
-    GroupSerializer,
-    PaymentSerializer,
-    UserProfileSerializer,
-    UserRegisterSerializer,
-)
+from .serializers import (CustomTokenObtainPairSerializer, GroupSerializer,
+                          PaymentSerializer, UserProfileSerializer,
+                          UserRegisterSerializer)
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
+    """Класс для работы с платежами через Stripe"""
+
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated]
@@ -40,6 +44,94 @@ class PaymentViewSet(viewsets.ModelViewSet):
         if not self.request.user.is_staff:
             queryset = queryset.filter(user=self.request.user)
         return queryset
+
+    @swagger_auto_schema(
+        method="post",
+        operation_summary="Создать платеж",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["course_id", "amount"],
+            properties={
+                "course_id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                "amount": openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        ),
+        responses={
+            201: openapi.Response(
+                description="Ссылка на оплату",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "payment_url": openapi.Schema(type=openapi.TYPE_STRING),
+                    },
+                ),
+            ),
+            400: "Неверные данные",
+            404: "Курс не найден",
+        },
+    )
+    @action(detail=False, methods=["post"], url_path="create")
+    def create_payment(self, request):
+        course = get_object_or_404(Course, id=request.data.get("course_id"))
+        amount = request.data.get("amount")
+
+        # Создаем продукт и цену в Stripe
+        product_id = StripeService.create_product(
+            name=course.title, description=course.description
+        )
+        price_id = StripeService.create_price(
+            amount=float(amount), product_id=product_id
+        )
+
+        # Создаем сессию оплаты
+        session = StripeService.create_session(
+            price_id=price_id,
+            success_url="http://127.0.0.1:8000/success/",
+            cancel_url="http://127.0.0.1:8000/cancel/",
+        )
+
+        # Сохраняем платеж в БД
+        payment = Payment.objects.create(
+            user=request.user,
+            paid_course=course,
+            amount=float(amount),
+            stripe_product_id=product_id,
+            stripe_price_id=price_id,
+            stripe_session_id=session["session_id"],
+            stripe_payment_url=session["payment_url"],
+        )
+
+        return Response(
+            {"payment_url": session["payment_url"]}, status=status.HTTP_201_CREATED
+        )
+
+    @swagger_auto_schema(
+        method="get",
+        operation_summary="Проверить статус платежа",
+        responses={
+            200: openapi.Response(
+                description="Статус платежа",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "is_paid": openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                    },
+                ),
+            ),
+            404: "Платеж не найден",
+        },
+    )
+    @action(detail=True, methods=["get"], url_path="check-status")
+    def check_status(self, request, pk=None):
+        """Проверка статуса платежа в Stripe"""
+        payment = get_object_or_404(Payment, id=pk, user=request.user)
+        is_paid = StripeService.check_payment_status(payment.stripe_session_id)
+
+        if is_paid and not payment.is_paid:
+            payment.is_paid = True
+            payment.save()
+
+        return Response({"is_paid": is_paid})
 
 
 class UserViewSet(viewsets.ModelViewSet):
