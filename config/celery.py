@@ -14,5 +14,5 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Автоматическое обнаружение и регистрация задач из файлов tasks.py в приложениях Django
 app.autodiscover_tasks()
-
+app.conf.beat_schedule = settings.CELERY_BEAT_SCHEDULE
 app.conf.timezone = settings.TIME_ZONE
