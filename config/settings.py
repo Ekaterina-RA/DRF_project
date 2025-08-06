@@ -147,7 +147,7 @@ CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:63
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULE = {
     'deactivate-inactive-users': {
-        'task': 'users.tasks.deactivate_inactive_users',
+        'task': 'users.tasks.check_inactive_users',
         'schedule': crontab(hour=2, minute=0),
         'options': {
             'expires': 3600,
