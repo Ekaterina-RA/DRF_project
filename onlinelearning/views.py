@@ -7,6 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from onlinelearning.tasks import (send_course_update_notification,
+                                  send_lesson_update_notification)
+
 from .models import Course, Lesson, Subscription
 from .paginators import CoursePagination, LessonPagination
 from .permissions import IsModerator, IsOwnerOrModerator
@@ -58,6 +61,10 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        send_course_update_notification.delay(instance.id)
+
 
 class LessonViewSet(viewsets.ModelViewSet):
     serializer_class = LessonSerializer
@@ -83,6 +90,10 @@ class LessonViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        send_lesson_update_notification.delay(instance.id)
 
 
 class SubscriptionAPIView(APIView):

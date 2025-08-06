@@ -57,8 +57,7 @@ class StripeService:
             raise
 
     @staticmethod
-    def create_session(
-        price_id, success_url, cancel_url):
+    def create_session(price_id, success_url, cancel_url):
         """Создаем сессию оплаты"""
         StripeService._check_keys()
 

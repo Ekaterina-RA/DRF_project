@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 from django.conf.global_settings import MEDIA_ROOT, MEDIA_URL
 from dotenv import load_dotenv
 
@@ -34,6 +35,7 @@ INSTALLED_APPS = [
     "users",
     "onlinelearning",
     "drf_yasg",
+    "django_celery_beat",
 ]
 
 REST_FRAMEWORK = {
@@ -114,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
@@ -138,3 +140,17 @@ STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 # Проверяем, что ключи работают
 if not STRIPE_SECRET_KEY or not STRIPE_PUBLIC_KEY:
     raise ValueError("Stripe API keys are missing in environment variables")
+
+# Celery + Redis
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    'deactivate-inactive-users': {
+        'task': 'users.tasks.check_inactive_users',
+        'schedule': crontab(hour=2, minute=0),
+        'options': {
+            'expires': 3600,
+        },
+    },
+}
