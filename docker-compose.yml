@@ -61,7 +61,6 @@ services:
   celery-beat:
     build: .
     # Переопределяем CMD для планировщика задач
-
     command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - .:/app
