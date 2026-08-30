@@ -134,12 +134,12 @@ jobs:
             --exclude 'media' \
             --exclude '*.pyc' \
             -e "ssh -o StrictHostKeyChecking=no" \
-            . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+            . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/var/www/DRF_project
 
       - name: Restart Docker containers on server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ${{ secrets.DEPLOY_DIR }}
+            cd /var/www/DRF_project
             sudo docker compose down
             sudo docker compose up -d --build
             sudo docker image prune -f
