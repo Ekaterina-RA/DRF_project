@@ -14,9 +14,13 @@ from onlinelearning.services_stripe import StripeService
 
 from .models import Payment, User
 from .permissions import IsOwner
-from .serializers import (CustomTokenObtainPairSerializer, GroupSerializer,
-                          PaymentSerializer, UserProfileSerializer,
-                          UserRegisterSerializer)
+from .serializers import (
+    CustomTokenObtainPairSerializer,
+    GroupSerializer,
+    PaymentSerializer,
+    UserProfileSerializer,
+    UserRegisterSerializer,
+)
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
