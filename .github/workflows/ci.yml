@@ -29,14 +29,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -52,6 +45,8 @@ jobs:
           PASSWORD: test_password
           HOST: localhost
           PORT: '5432'
+          STRIPE_PUBLIC_KEY: pk_test_dummy_key_for_ci
+          STRIPE_SECRET_KEY: sk_test_dummy_key_for_ci
         run: python manage.py migrate
 
       - name: Run tests
@@ -63,6 +58,8 @@ jobs:
           PASSWORD: test_password
           HOST: localhost
           PORT: '5432'
+          STRIPE_PUBLIC_KEY: pk_test_dummy_key_for_ci
+          STRIPE_SECRET_KEY: sk_test_dummy_key_for_ci
         run: python manage.py test
 
   lint:
