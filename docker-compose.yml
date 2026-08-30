@@ -1,77 +1,9 @@
+version: '3.9'
 services:
-  db:
-    image: postgres:15-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - .env
-    expose:
-      - "5432"
-    environment:
-      - POSTGRES_DB=${NAME}
-      - POSTGRES_USER=${USER}
-      - POSTGRES_PASSWORD=${PASSWORD}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${USER} -d ${NAME}"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-    expose:
-      - "6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-
-  web:
+  nginx:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app
-    env_file:
-      - .env
     ports:
-      - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  celery:
-    build: .
-    # Переопределяем CMD из Dockerfile, так как этому сервису нужен worker
-    command: celery -A config worker -l info
+      - "80:80"
     volumes:
-      - .:/app
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  celery-beat:
-    build: .
-    # Переопределяем CMD для планировщика задач
-    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    volumes:
-      - .:/app
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-volumes:
-  postgres_data:
-  redis_data:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./html:/usr/share/nginx/html
