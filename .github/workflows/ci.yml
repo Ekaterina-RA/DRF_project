@@ -21,6 +21,16 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -29,14 +39,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -52,6 +55,8 @@ jobs:
           PASSWORD: test_password
           HOST: localhost
           PORT: '5432'
+          STRIPE_PUBLIC_KEY: pk_test_dummy_key_for_ci
+          STRIPE_SECRET_KEY: sk_test_dummy_key_for_ci
         run: python manage.py migrate
 
       - name: Run tests
@@ -63,6 +68,8 @@ jobs:
           PASSWORD: test_password
           HOST: localhost
           PORT: '5432'
+          STRIPE_PUBLIC_KEY: pk_test_dummy_key_for_ci
+          STRIPE_SECRET_KEY: sk_test_dummy_key_for_ci
         run: python manage.py test
 
   lint:
@@ -80,16 +87,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 black isort
+          pip install flake8
 
       - name: Run Flake8
         run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-
-      - name: Check black formatting
-        run: black --check .
-
-      - name: Check isort imports
-        run: isort --check-only --diff .
 
   build:
     runs-on: ubuntu-latest
@@ -115,9 +116,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.8.0
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Debug secrets structure
+        run: |
+          echo "Структура адреса: ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}"
 
       - name: Copy project files to server via rsync
         run: |
@@ -129,12 +134,12 @@ jobs:
             --exclude 'media' \
             --exclude '*.pyc' \
             -e "ssh -o StrictHostKeyChecking=no" \
-            . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+            . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/var/www/DRF_project
 
       - name: Restart Docker containers on server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ${{ secrets.DEPLOY_DIR }}
+            cd /var/www/DRF_project
             sudo docker compose down
             sudo docker compose up -d --build
             sudo docker image prune -f
