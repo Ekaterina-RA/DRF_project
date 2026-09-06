@@ -1,11 +1,18 @@
-# Используем официальный образ Nginx
-FROM nginx:latest
+FROM python:3.12-slim
 
-# Копируем файл конфигурации Nginx в контейнер
-COPY nginx.conf /etc/nginx/nginx.conf
+# Устанавливаем системные зависимости для psycopg2 и сборки
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Копируем статические файлы веб-сайта в директорию для обслуживания
-COPY html/ /usr/share/nginx/html/
+WORKDIR /app
 
-# Открываем порт 80 для HTTP-трафика
-EXPOSE 80
+# Копируем зависимости и устанавливаем их
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Копируем весь код проекта
+COPY . .
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -51,4 +51,4 @@ $Recycle.Bin/
 build/
 dist/
 *.egg-info/
-.eggs/
+.eggs
