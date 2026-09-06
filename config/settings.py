@@ -18,9 +18,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,web,db,redis").split(",")
 
 
 INSTALLED_APPS = [
@@ -123,7 +123,8 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
@@ -146,11 +147,11 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BEAT_SCHEDULE = {
-    'deactivate-inactive-users': {
-        'task': 'users.tasks.check_inactive_users',
-        'schedule': crontab(hour=2, minute=0),
-        'options': {
-            'expires': 3600,
+    "deactivate-inactive-users": {
+        "task": "users.tasks.check_inactive_users",
+        "schedule": crontab(hour=2, minute=0),
+        "options": {
+            "expires": 3600,
         },
     },
 }

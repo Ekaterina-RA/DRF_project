@@ -24,3 +24,12 @@
 1. Клонируйте репозиторий git@github.com:Ekaterina-RA/DRF_project.git
 2. Установите зависимости pip install, которые указаны в файле requirements.txt
 3. Тестирование. Отчет по покрытию тестами находится в файле .coverage_report.txt
+
+## Запуск приложения с помощью Docker
+
+1. Проект полностью контейнеризован. 
+2. Для запуска всех сервисов (веб-приложение, Celery worker, Celery Beat, PostgreSQL, Redis) необходимо выполнить следующие шаги:
+
+2.1 Установить Docker и Docker Compose
+2.2 Создать файл `.env` в корне проекта на основе шаблона:
+.env.sample .env
