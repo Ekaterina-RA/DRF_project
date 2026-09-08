@@ -143,14 +143,12 @@ class SubscriptionTestCase(APITestCase):
 
     # Создание подписки
     def test_is_subscribed_flag(self):
-        # Создаем подписку
         Subscription.objects.create(user=self.user, course=self.course)
-
-        url = reverse("course-detail", args=[self.course.id])
         self.client.force_authenticate(user=self.user)
+        url = reverse("onlinelearning:courses-detail", args=[self.course.id])
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data["is_subscribed"])
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data.get("is_subscribed"))
 
     # Разрешения на подписку
     def test_subscribe_unauthorized(self):
