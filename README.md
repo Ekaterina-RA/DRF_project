@@ -1,35 +1,76 @@
-#Проект "Онлайн-обучение"
+# DRF Project "Онлайн-обучение"
 
-##Описание: созданы приложения onlinelearning и users на основе DRF:
-1. Данные приложения зарегистрированы в настройках (config\settings.py\installed app)
-2. Созданы модели Course, Lesson и User
-3.  Описаны CRUD для моделей Course (Viewsets) и Lesson (Generic)
-4. Создан файл serializers.py, гдн описаны простые сериализаторы для моделей Course и Lesson
-5. Для модели Course добавлено поле lessons_count (поле вывода количества уроков)
-6. Создана новая модель Payments, добавлена фильтрация для вывода списка платежей в классе PaymentViewSet
-7. Реализован CRUD пользователей, настроена в проекте JWT-авторизация
-8. Создана группа модераторов с ограниченными правами
-9. В файле validators.py реализован валидатор, который проверяет ссылку, указанную пользователем в поле урока.
-10. Создана новая модель Sunscription, имеющая связь с моделями User и Course
-11. В файле paginators.py добавлена пагинация для вывода уроков и курсов
-12. Написаны тесты , которые проверяют корректность работы CRUD уроков и подписки
-13. Настроена библиотека drf-yasg для работы с документацией данного проекта
-14. Подключена возможность оплаты курсов через stripe
-15. Проект настроен для работы с Celery worker и celery-beat
-16. В onlinelearning/tasks.py добавлена асинхронная рассылка писем пользователям об обновлении материалов курса
-17. Реализована фоновая задача с помощью celery-beat
+Полнофункциональный Django REST Framework проект с автоматическим деплоем через GitHub Actions.
 
+## 🚀 Возможности проекта
 
-##Установка:
-1. Клонируйте репозиторий git@github.com:Ekaterina-RA/DRF_project.git
-2. Установите зависимости pip install, которые указаны в файле requirements.txt
-3. Тестирование. Отчет по покрытию тестами находится в файле .coverage_report.txt
+- ✅ REST API с аутентификацией JWT
+- ✅ Админ-панель Django
+- ✅ Интеграция со Stripe для платежей
+- ✅ Асинхронные задачи через Celery + Redis
+- ✅ Автоматическое тестирование (CI/CD)
+- ✅ Docker-контейнеризация
+- ✅ Deploy (Yandex Cloud)
+- ✅ Nginx reverse proxy
+- ✅ PostgreSQL база данных
 
-## Запуск приложения с помощью Docker
+## 🛠 Технологии
 
-1. Проект полностью контейнеризован. 
-2. Для запуска всех сервисов (веб-приложение, Celery worker, Celery Beat, PostgreSQL, Redis) необходимо выполнить следующие шаги:
+**Backend:**
+- Python 3.12
+- Django 5.2.4
+- Django REST Framework 3.16.0
+- SimpleJWT 5.5.1 (аутентификация)
+- Celery 5.5.3 (асинхронные задачи)
+- Stripe API (платежи)
+- drf-yasg (документация API)
+- 
+**База данных:**
+- PostgreSQL 15
 
-2.1 Установить Docker и Docker Compose
-2.2 Создать файл `.env` в корне проекта на основе шаблона:
-.env.sample .env
+**Кэширование и очереди:**
+- Redis 7
+
+**DevOps:**
+- Docker & Docker Compose
+- Nginx (reverse proxy)
+- GitHub Actions (CI/CD)
+- Yandex Cloud (production server)
+
+## 📦 Локальная установка
+
+### Требования
+- Python 3.12+
+- PostgreSQL 15+
+- Redis 7+
+
+### Шаги установки
+
+1. Клонируйте репозиторий:
+   git clone https://github.com/Ekaterina-RA/DRF_project.git
+   cd DRF_project
+2. Создайте виртуальное окружение командами:
+ - python -m venv venv
+ - venv\Scripts\activate (Windows)
+3. Установите зависимости: pip install -r requirements.txt
+4. Настройте переменные окружения в файле .env (в корне проекта)
+5. Примените миграции: python manage.py migrate
+6. Создайте суперпользователя: python manage.py createsuperuser
+7. Запустите сервер: python manage.py runserver
+
+###№ Запуск через Docker
+1. Собираем и запускаем контейнеры проекта: docker compose -f docker-compose-dep.yml up -d --build
+2.Применяем миграции: docker exec -it drf_project-web-1 python manage.py migrate
+3. Создаем суперпользователя: docker exec -it drf_project-web-1 python manage.py createsuperuser
+
+###Полезные ссылки
+📚 API Документация
+API документация доступна через drf-yasg:
+Swagger UI: http://51.250.101.46/swagger/
+ReDoc: http://51.250.101.46/redoc/
+
+Проект развернут по адресу: http://51.250.101.46/admin/
+
+🤝 Автор
+Екатерина
+GitHub: @Ekaterina-RA
